@@ -37,9 +37,11 @@ class _DeepcellWorker:
         self.mem_folder = pathlib.Path('tiled_for_deepcell', self.folder, f'{self.name}_{self.membrane_channel}')
         if not self.mem_folder.is_dir():
             raise FileNotFoundError(f'{self.mem_folder} does not exist or is not a directory')
+        
+        self.outfile_basename = f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{str(int(interior_threshold*1000))}_{str(int(maxima_threshold*1000))}'
 
     def process(self):
-        pathlib.Path('deepcell_labelled_tiles', self.folder, self.name).mkdir(
+        pathlib.Path('deepcell_labelled_tiles', self.folder, self.name, self.outfile_basename).mkdir(
             exist_ok=True, parents=True)
 
         pattern = re.compile(f'{self.name}_{self.nucleus_channel}_(?P<x0>\d+)_(?P<y0>\d+)\.png')
@@ -66,11 +68,9 @@ class _DeepcellWorker:
                 'interior_threshold': interior_threshold,
                 'maxima_threshold': maxima_threshold},
             compartment = self.compartment)
-        interior_threshold_str = str(int(interior_threshold*1000))
-        maxima_threshold_str = str(int(maxima_threshold*1000))
 
         tifffile.imwrite(
             pathlib.Path('deepcell_labelled_tiles', self.folder, self.name,
-                f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{interior_threshold_str}_{maxima_threshold_str}',
-                f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{interior_threshold_str}_{maxima_threshold_str}_{x0}_{y0}.tif'),
+                self.outfile_basename,
+                f'{self.outfile_basename}_{x0}_{y0}.tif'),
             predictions[0,...])
