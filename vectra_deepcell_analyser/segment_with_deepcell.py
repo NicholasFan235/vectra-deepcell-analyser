@@ -39,7 +39,6 @@ class _DeepcellWorker:
             raise FileNotFoundError(f'{self.mem_folder} does not exist or is not a directory')
 
     def process(self):
-        import deepcell
         pathlib.Path('deepcell_labelled_tiles', self.folder, self.name).mkdir(
             exist_ok=True, parents=True)
 
@@ -49,6 +48,7 @@ class _DeepcellWorker:
             self._process_tile(int(m['x0']), int(m['y0']))
 
     def _process_tile(self, x0:int, y0:int):
+        import deepcell
         print(x0, y0)
         nuc = tifffile.imread(
             pathlib.Path(self.nuc_folder, f'{self.name}_{self.nucleus_channel}_{x0}_{y0}.png'))

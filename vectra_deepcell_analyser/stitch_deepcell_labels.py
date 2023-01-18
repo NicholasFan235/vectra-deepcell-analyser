@@ -56,7 +56,7 @@ class _StitchDeepcellLabelsX:
         im = tifffile.TiffFile(p)
         self.original_shape = im.pages[0].shape
 
-        self.tile_basename = f'{name}_{nucleus_channel}_{membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
+        self.tile_basename = f'{name}_{compartment}_{nucleus_channel}_{membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
         self.tiles_folder = pathlib.Path('deepcell_labelled_tiles', folder, name, self.tile_basename)
         if not self.tiles_folder.is_dir():
             raise FileNotFoundError(f'{self.tiles_folder} is not a directory')
@@ -169,7 +169,7 @@ class _StitchDeepcellLabelsY:
         im = tifffile.TiffFile(p)
         self.original_shape = im.pages[0].shape
 
-        self.tile_basename = f'{name}_{nucleus_channel}_{membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
+        self.tile_basename = f'{name}_{compartment}_{nucleus_channel}_{membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
         self.tiles_folder = pathlib.Path('deepcell_labelled_tiles_x_stitched', folder, name, self.tile_basename)
         if not self.tiles_folder.is_dir():
             raise FileNotFoundError(f'{self.tiles_folder} is not a directory')
