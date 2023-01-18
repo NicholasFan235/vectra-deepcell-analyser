@@ -1,5 +1,4 @@
 import tifffile
-import deepcell
 import pathlib
 import re
 import tqdm
@@ -40,6 +39,7 @@ class _DeepcellWorker:
             raise FileNotFoundError(f'{self.mem_folder} does not exist or is not a directory')
 
     def process(self):
+        import deepcell
         pathlib.Path('deepcell_labelled_tiles', self.folder, self.name).mkdir(
             exist_ok=True, parents=True)
 
