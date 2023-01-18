@@ -38,7 +38,7 @@ class _DeepcellWorker:
         if not self.mem_folder.is_dir():
             raise FileNotFoundError(f'{self.mem_folder} does not exist or is not a directory')
         
-        self.outfile_basename = f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{str(int(interior_threshold*1000))}_{str(int(maxima_threshold*1000))}'
+        self.outfile_basename = f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
 
     def process(self):
         pathlib.Path('deepcell_labelled_tiles', self.folder, self.name, self.outfile_basename).mkdir(
