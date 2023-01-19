@@ -40,7 +40,7 @@ class _CalculateCetroidsWorker:
 
         labelled = tifffile.imread(infile)
         max_cid = np.max(labelled)
-        for id in tqdm.tqdm(range(max_cid)):
+        for id in tqdm.tqdm(range(max_cid), maxval=max_cid):
             m = np.argwhere(labelled==id)
             if m.shape[0] > 0:
                 data.loc[id] = m.mean(0)
