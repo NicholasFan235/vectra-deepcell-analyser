@@ -29,7 +29,7 @@ class _CalculateCetroidsWorker:
 
 
     def process(self):
-        infile = pathlib.Path('deepcell_labelled', self.folder, f'{self.infile_basename}.tif')
+        infile = pathlib.Path('deepcell_labelled', self.folder, self.name, f'{self.infile_basename}.tif')
         if not infile.is_file():
             raise FileNotFoundError(f'{infile} does not exist or is a directory')
         
