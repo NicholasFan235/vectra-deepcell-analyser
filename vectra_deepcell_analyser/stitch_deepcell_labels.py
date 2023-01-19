@@ -175,7 +175,7 @@ class _StitchDeepcellLabelsY:
             raise FileNotFoundError(f'{self.tiles_folder} is not a directory')
 
     def process(self):
-        self.outfolder = pathlib.Path('deepcell_labelled', self.folder, self.name, self.tile_basename)
+        self.outfolder = pathlib.Path('deepcell_labelled', self.folder, self.name)
         self.outfolder.mkdir(exist_ok=True, parents=True)
 
         self._stitch_y()
