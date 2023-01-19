@@ -38,14 +38,18 @@ class _CalculateCetroidsWorker:
 
         data = pd.DataFrame(columns=('Object Id', 'centroid_x_pixels', 'centroid_y_pixels')).set_index('Object Id')
 
-        labelled = tifffile.imread(infile)
-        max_cid = np.max(labelled)
-        for id in tqdm.tqdm(range(max_cid)):
-            m = np.argwhere(labelled==id)
-            if m.shape[0] > 0:
-                data.loc[id] = m.mean(0)
+        im = tifffile.imread(infile)
+        labelled = im.reshape(im.shape + (1,))
+        indices = np.moveaxis(np.indices(im.shape), 0, 2)
+        formatted = np.dstack((indices, labelled))[im>0,...].reshape((-1, 3))
 
-        data['centroid_x'] = data.centroid_x_pixels * DeepcellConfig.image_mpp
-        data['centroid_y'] = data.centroid_y_pixels * DeepcellConfig.image_mpp
+        df = pd.DataFrame(formatted, columns=['y', 'x', 'label'])
+        df.to_csv(pathlib.Path('centroids', self.folder, self.name, f'{self.infile_basename}_pixel_data.csv'), index=False)
 
-        data.to_csv(pathlib.Path('centroids', self.folder, f'{self.infile_basename}_centroids.csv'))
+        centroids = df.groupby('label').mean()
+        centroids.rename(columns={'y':'centroid_y_pixels', 'x':'centroid_x_pixels'})
+        centroids['area_pixels'] = df.groupby('label').size()
+        centroids.join(df.groupby('label').min().rename(columns={'y':'min_y_pixels', 'x':'min_x_pixels'}))
+        centroids.join(df.groupby('label').max().rename(columns={'y':'max_y_pixels', 'x':'max_x_pixels'}))
+
+        centroids.to_csv(pathlib.Path('centroids', self.folder, f'{self.infile_basename}_centroids.csv'))
