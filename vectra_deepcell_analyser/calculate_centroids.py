@@ -21,7 +21,8 @@ def centroid_geojson(folder, name,
         membrane_channel:str='ECad',
         interior_threshold:float=None,
         maxima_threshold:float=None):
-    pass
+    worker = _CalculateCetroidsWorker(folder, name, compartment, nucleus_channel, membrane_channel, interior_threshold, maxima_threshold)
+    worker.make_geojson()
 
 
 class _CalculateCetroidsWorker:
