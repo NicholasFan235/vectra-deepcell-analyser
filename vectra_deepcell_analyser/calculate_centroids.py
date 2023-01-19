@@ -3,6 +3,7 @@ import numpy as np
 import pathlib
 import tqdm
 import pandas as pd
+import geojson
 from .config import DeepcellConfig
 
 def calculate_centroids(folder, name,
@@ -13,6 +14,14 @@ def calculate_centroids(folder, name,
         maxima_threshold:float=None):
     worker = _CalculateCetroidsWorker(folder, name, compartment, nucleus_channel, membrane_channel, interior_threshold, maxima_threshold)
     worker.process()
+
+def centroid_geojson(folder, name,
+        compartment='whole-cell',
+        nucleus_channel:str='DAPI',
+        membrane_channel:str='ECad',
+        interior_threshold:float=None,
+        maxima_threshold:float=None):
+    pass
 
 
 class _CalculateCetroidsWorker:
@@ -27,6 +36,10 @@ class _CalculateCetroidsWorker:
 
         self.infile_basename = f'{self.name}_{self.compartment}_{self.nucleus_channel}_{self.membrane_channel}_{str(int(self.interior_threshold*1000))}_{str(int(self.maxima_threshold*1000))}'
 
+    def has_processed(self):
+        outfolder = pathlib.Path('centroids', self.folder, self.name)
+        outfolder.mkdir(exist_ok=True, parents=True)
+        return pathlib.Path(outfolder,  f'{self.infile_basename}_centroids.csv').is_file()
 
     def process(self):
         infile = pathlib.Path('deepcell_labelled', self.folder, self.name, f'{self.infile_basename}.tif')
@@ -47,9 +60,24 @@ class _CalculateCetroidsWorker:
         df.to_csv(pathlib.Path(outfolder, f'{self.infile_basename}_pixel_data.csv'), index=False)
 
         centroids = df.groupby('label').mean()
-        centroids.rename(columns={'y':'centroid_y_pixels', 'x':'centroid_x_pixels'})
+        centroids = centroids.rename(columns={'y':'centroid_y_pixels', 'x':'centroid_x_pixels'})
         centroids['area_pixels'] = df.groupby('label').size()
         centroids = centroids.join(df.groupby('label').min().rename(columns={'y':'min_y_pixels', 'x':'min_x_pixels'}))
         centroids = centroids.join(df.groupby('label').max().rename(columns={'y':'max_y_pixels', 'x':'max_x_pixels'}))
 
+        centroids.index = centroids.index.rename('Object Id')
         centroids.to_csv(pathlib.Path(outfolder, f'{self.infile_basename}_centroids.csv'))
+
+    def make_geojson(self):
+        outfolder = pathlib.Path('centroids', self.folder, self.name)
+        outfolder.mkdir(exist_ok=True, parents=True)
+        if not pathlib.Path(outfolder,  f'{self.infile_basename}_centroids.csv').is_file():
+            self.process()
+        outfile = pathlib.Path(outfolder, f'{self.infile_basename}_centroids.geojson')
+
+        centroids = pd.read_csv(pathlib.Path(outfolder, f'{self.infile_basename}_centroids.csv'), index_col='Object Id')
+        points = geojson.MultiPoint(
+            list(centroids[['centroid_x_pixels', 'centroid_y_pixels']].itertuples(index=False, name=None)),
+            properties={"object_type": "detection", "isLocked": True, "Name": "deepcell"})
+        
+        geojson.dump([points], open(outfile, 'w'), indent=2)
