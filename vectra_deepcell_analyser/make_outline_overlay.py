@@ -56,6 +56,6 @@ class _OutlineOverlayWorker:
         #rgb_image = np.expand_dims(rgb_image, 0)
 
         rgb_image[outlines>0, :] = 1
-        tifffile.imwrite(outfile, rgb_image)
+        tifffile.imwrite(outfile, rgb_image, compression='lzw')
         tifffile.imwrite(pathlib.Path(outfolder, f'{self.deepcell_basename}_outline_mask.qptiff'),
-            outlines)
+            outlines, compression='lzw')
