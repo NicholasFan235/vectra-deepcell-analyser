@@ -5,6 +5,7 @@ import numpy as np
 
 from .config import DeepcellConfig
 from .panel_data import ImmunePanel
+from ._helpers._timer import _Timer
 
 
 def compute_immune_markers(folder, name,
@@ -40,18 +41,28 @@ class _CalculateMarkers:
                 raise FileNotFoundError(f'{p} does not exist or is a directory')
 
     def process(self):
-        arrs = []
-        markers = ['y', 'x', 'label']
-        im = tifffile.imread(self.labelled_file)
-        arrs.append(im.reshape(im.shape + (1,)))
-        arrs.append(np.moveaxis(np.indices(im.shape), 0, 2))
+        outfolder = pathlib.Path('output', self.folder, self.name)
+        outfolder.mkdir(exist_ok=True, parents=True)
+        outfile = pathlib.Path(outfolder, f'{self.deepcell_basename}.csv')
 
-        for marker in self.panel.channel_map.values():
-            markers.append(marker)
-            arrs.append(self._get_marker(marker))
+        with _Timer('Compute Mean Markers'):
+            arrs = []
+            markers = ['Object Id']
+            im = tifffile.imread(self.labelled_file)
+            arrs.append(im.reshape(im.shape + (1,)))
 
-        formatted = np.dstack(arrs)[im>0, ...].reshape((-1, len(markers)))
-        return pd.DataFrame(formatted, columns=markers).set_index(['y', 'x'])
+            for marker in self.panel.channel_map.values():
+                markers.append(marker)
+                arrs.append(self._get_marker(marker))
+
+            formatted = np.dstack(arrs)[im>0, ...].reshape((-1, len(markers)))
+
+            pixel_data = pd.DataFrame(formatted, columns=markers)
+        
+            mean_markers = pixel_data.groupby('Object Id').mean()
+
+        with _Timer('Write to File'):
+            mean_markers.to_csv(outfile, index=False)
 
     def _get_marker(self, marker):
         im = tifffile.imread(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'))
