@@ -8,3 +8,4 @@ from .segment_with_deepcell import segment_with_deepcell
 from .stitch_deepcell_labels import stitch_deepcell_labels, stitch_deepcell_labels_x, stitch_deepcell_labels_y
 from .calculate_centroids import calculate_centroids, centroid_geojson
 from .make_outline_overlay import make_outline_overlay
+from .compute_markers import compute_immune_markers
