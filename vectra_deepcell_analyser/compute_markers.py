@@ -34,26 +34,25 @@ class _CalculateMarkers:
         if not self.labelled_file.is_file():
             raise FileNotFoundError(f'{self.labelled_file} does not exist or is a directory')
         self.unstacked_folder = pathlib.Path('unstacked', self.folder)
-        for marker in panel.channel_map.values():
+        for marker in self.panel.channel_map.values():
             p = pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif')
             if not p.is_file():
                 raise FileNotFoundError(f'{p} does not exist or is a directory')
 
     def process(self):
+        arrs = []
+        markers = ['y', 'x', 'label']
+        im = tifffile.imread(self.labelled_file)
+        arrs.append(im.reshape(im.shape + (1,)))
+        arrs.append(np.moveaxis(np.indices(im.shape), 0, 2))
 
-        pixel_df = self._get_labels()
-        pixel_df = pixel_df.join(self._get_marker('DAPI'), how='left')
-        return pixel_df
+        for marker in self.panel.chanel_map.values():
+            markers.append(marker)
+            arrs.append(self._get_marker(marker))
 
-    def _get_labels(self):
-        return self._get_pixel_df(self.labelled_file, 'label')
-    
+        formatted = np.dstack(arrs)[im>0, ...].reshape((-1, len(markers)))
+        return pd.DataFrame(formatted, columns=markers).set_index(['y', 'x'])
+
     def _get_marker(self, marker):
-        return self._get_pixel_df(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'), marker)
-    
-    def _get_pixel_df(self, file, marker):
-        im = tifffile.imread(file)
-        labelled = im.reshape(im.shape + (1,))
-        indices = np.moveaxis(np.indices(im.shape), 0, 2)
-        formatted = np.dstack((indices, labelled))[im>0, ...].reshape((-1, 3))
-        return pd.DataFrame(formatted, columns=['y', 'x', marker]).set_index(['y', 'x'])
+        im = tifffile.imread(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'))
+        return im.reshape(im.shape + (1,))
