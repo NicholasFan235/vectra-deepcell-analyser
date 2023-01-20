@@ -14,7 +14,7 @@ def make_outline_overlay(folder, name,
         maxima_threshold:float=None):
     worker = _OutlineOverlayWorker(folder, name, compartment, nucleus_channel, membrane_channel, interior_threshold, maxima_threshold)
     worker.process()
-    
+
 
 class _OutlineOverlayWorker:
     def __init__(self, folder, name, compartment, nucleus_channel, membrane_channel, interior_threshold, maxima_threshold):
@@ -43,7 +43,7 @@ class _OutlineOverlayWorker:
     def process(self):
         outfolder = pathlib.Path('outlined', self.folder)
         outfolder.mkdir(exist_ok=True, parents=True)
-        outfile = pathlib.Path(self.outfolder, f'{self.deepcell_basename}_outlined.qptiff')
+        outfile = pathlib.Path(outfolder, f'{self.deepcell_basename}_outlined.qptiff')
 
         labelled = tifffile.imread(self.labelled_file)
         outlines = skimage.segmentation.find_boundaries(labelled, connectivity=1, mode='inner')
