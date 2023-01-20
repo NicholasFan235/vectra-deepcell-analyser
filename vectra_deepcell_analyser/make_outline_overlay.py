@@ -47,7 +47,8 @@ class _OutlineOverlayWorker:
 
         labelled = tifffile.imread(self.labelled_file)
         outlines = skimage.segmentation.find_boundaries(labelled, connectivity=1, mode='inner')
-        
+        outlines[outlines>0] = 1
+
         nuc = tifffile.imread(self.nucleus_file)
         mem = tifffile.imread(self.membrane_file)
 
@@ -56,3 +57,5 @@ class _OutlineOverlayWorker:
 
         rgb_image[outlines>0, :] = 1
         tifffile.imwrite(outfile, rgb_image)
+        tifffile.imwrite(pathlib.Path(outfolder, f'{self.deepcell_basename}_outline_mask.qptiff'),
+            outlines)
