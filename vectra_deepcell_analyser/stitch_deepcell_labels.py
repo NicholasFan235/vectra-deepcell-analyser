@@ -219,9 +219,7 @@ class _StitchDeepcellLabelsY:
             r = ims[i+1].pages[0].asarray()[:ry1, :]
             r[r>0] += offsets[i+1]
             self._solve_overlap(
-                ims[i].pages[0].asarray()[ly0:,:],
-                ims[i+1].pages[0].asarray()[:ry1,:],
-                stitched, y0, y1)
+                l, r, stitched, y0, y1)
         
         outfile = pathlib.Path(self.outfolder, f'{self.tile_basename}.tif')
         tifffile.imwrite(outfile, stitched)
