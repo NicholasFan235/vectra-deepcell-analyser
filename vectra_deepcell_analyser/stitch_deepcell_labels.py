@@ -79,7 +79,7 @@ class _StitchDeepcellLabelsX:
             ims.append(im)
         stitched = np.zeros((ims[0].pages[0].shape[0], self.original_shape[1]), dtype='uint32')
 
-        offsets = []
+        offsets = [0]
         for i, im in enumerate(ims):
             x0 = i*DeepcellConfig.tile_width
             x1 = (i+1)*DeepcellConfig.tile_width
@@ -90,11 +90,12 @@ class _StitchDeepcellLabelsX:
             tile_x0 = 0 if i <= 0 else tile_x0
             tile_x1 -= DeepcellConfig.tile_padding_x if i <= 0 else 0
             
-            offsets.append(np.max(stitched))
+            offsets.append(offsets[-1] + np.max(tile))
             tile = im.pages[0].asarray()[:, tile_x0:tile_x1]
             tile[tile>0] += offsets[i]
             stitched[:, x0:x1] = tile
         print(f'Done basic stitch y0:{y}')
+        self.overflow_cid = offsets[-1] + 1
 
         for i in range(len(ims)-1):
             print(f'Solving overlap #{i}')
@@ -108,9 +109,7 @@ class _StitchDeepcellLabelsX:
             r = ims[i+1].pages[0].asarray()[:, :rx1]
             r[r>0] += offsets[i+1]
             self._solve_overlap(
-                ims[i].pages[0].asarray()[:,lx0:],
-                ims[i+1].pages[0].asarray()[:,:rx1],
-                stitched, x0, x1)
+                l, r, stitched, x0, x1)
         
         outfile = pathlib.Path(self.outfolder, f'{self.tile_basename}_{y}.tif')
         tifffile.imwrite(outfile, stitched)
@@ -148,7 +147,8 @@ class _StitchDeepcellLabelsX:
             m = lm|rm
             if m.sum() > 50:
                 missing += 1
-                stitched[:,x0:x1][m] = np.max(stitched)+1
+                stitched[:,x0:x1][m] = self.overflow_cid
+                self.overflow_cid += 1
         print(f'Filled {missing} missing cells')
         return stitched
 
@@ -189,7 +189,7 @@ class _StitchDeepcellLabelsY:
             ims.append(im)
         stitched = np.zeros(self.original_shape, dtype='uint32')
 
-        offsets = []
+        offsets = [0]
         for i, im in enumerate(ims):
             y0 = i*DeepcellConfig.tile_height
             y1 = (i+1)*DeepcellConfig.tile_height
@@ -200,10 +200,11 @@ class _StitchDeepcellLabelsY:
             tile_y0 = 0 if i <= 0 else tile_y0
             tile_y1 -= DeepcellConfig.tile_padding_y if i <= 0 else 0
             
-            offsets.append(np.max(stitched))
+            offsets.append(offsets[-1] + np.max(tile))
             tile = im.pages[0].asarray()[tile_y0:tile_y1,:]
             tile[tile>0] += offsets[i]
             stitched[y0:y1,:] = tile
+        self.overflow_cid = offsets[-1] + 1
 
         for i in range(len(ims)-1):
             outfile = pathlib.Path(self.outfolder, f'{self.tile_basename}.tif')
@@ -257,6 +258,7 @@ class _StitchDeepcellLabelsY:
             m = lm|rm
             if m.sum() > 50:
                 missing += 1
-                stitched[y0:y1,:][m] = np.max(stitched)+1
+                stitched[y0:y1,:][m] = self.overflow_cid
+                self.overflow_cid += 1
         print(f'Filled {missing} missing cells')
         return stitched
