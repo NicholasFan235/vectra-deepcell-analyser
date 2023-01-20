@@ -90,8 +90,9 @@ class _StitchDeepcellLabelsX:
             tile_x0 = 0 if i <= 0 else tile_x0
             tile_x1 -= DeepcellConfig.tile_padding_x if i <= 0 else 0
             
+            tile = im.pages[0].asarray()
             offsets.append(offsets[-1] + np.max(tile))
-            tile = im.pages[0].asarray()[:, tile_x0:tile_x1]
+            tile = tile[:, tile_x0:tile_x1]
             tile[tile>0] += offsets[i]
             stitched[:, x0:x1] = tile
         print(f'Done basic stitch y0:{y}')
@@ -200,8 +201,9 @@ class _StitchDeepcellLabelsY:
             tile_y0 = 0 if i <= 0 else tile_y0
             tile_y1 -= DeepcellConfig.tile_padding_y if i <= 0 else 0
             
+            tile = im.pages[0].asarray()
             offsets.append(offsets[-1] + np.max(tile))
-            tile = im.pages[0].asarray()[tile_y0:tile_y1,:]
+            tile = tile[tile_y0:tile_y1,:]
             tile[tile>0] += offsets[i]
             stitched[y0:y1,:] = tile
         self.overflow_cid = offsets[-1] + 1
