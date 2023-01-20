@@ -46,7 +46,7 @@ class _CalculateMarkers:
         arrs.append(im.reshape(im.shape + (1,)))
         arrs.append(np.moveaxis(np.indices(im.shape), 0, 2))
 
-        for marker in self.panel.chanel_map.values():
+        for marker in self.panel.channel_map.values():
             markers.append(marker)
             arrs.append(self._get_marker(marker))
 
