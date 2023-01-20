@@ -62,7 +62,7 @@ class _CalculateMarkers:
             mean_markers = pixel_data.groupby('Object Id').mean()
 
         with _Timer('Write to File'):
-            mean_markers.to_csv(outfile, index=False)
+            mean_markers.to_csv(outfile)
 
     def _get_marker(self, marker):
         im = tifffile.imread(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'))
