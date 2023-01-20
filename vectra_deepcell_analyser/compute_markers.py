@@ -46,14 +46,14 @@ class _CalculateMarkers:
         return pixel_df
 
     def _get_labels(self):
-        return self._get_pixel_df(self.labelled_file)
+        return self._get_pixel_df(self.labelled_file, 'label')
     
     def _get_marker(self, marker):
-        return self._get_pixel_df(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'))
+        return self._get_pixel_df(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'), marker)
     
-    def _get_pixel_df(self, file):
+    def _get_pixel_df(self, file, marker):
         im = tifffile.imread(file)
         labelled = im.reshape(im.shape + (1,))
         indices = np.moveaxis(np.indices(im.shape), 0, 2)
         formatted = np.dstack((indices, labelled))[im>0, ...].reshape((-1, 3))
-        return pd.DataFrame(formatted, columns=['y', 'x', 'label']).set_index(['y', 'x'])
+        return pd.DataFrame(formatted, columns=['y', 'x', marker]).set_index(['y', 'x'])
