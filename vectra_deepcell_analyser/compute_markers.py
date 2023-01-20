@@ -14,7 +14,7 @@ def compute_immune_markers(folder, name,
         interior_threshold:float=None,
         maxima_threshold:float=None):
     worker = _CalculateMarkers(folder, name, ImmunePanel, compartment, nucleus_channel, membrane_channel, interior_threshold, maxima_threshold)
-    worker.process()
+    return worker.process()
 
 
 class _CalculateMarkers:
