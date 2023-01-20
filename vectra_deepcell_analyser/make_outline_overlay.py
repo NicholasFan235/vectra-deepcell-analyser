@@ -52,7 +52,7 @@ class _OutlineOverlayWorker:
         mem = tifffile.imread(self.membrane_file)
 
         rgb_image = np.stack((mem*0, mem/np.max(mem),nuc/np.max(nuc)), axis=-1)
-        rgb_image = np.expand_dims(rgb_image, 0)
+        #rgb_image = np.expand_dims(rgb_image, 0)
 
         rgb_image[outlines>0, :] = 1
         tifffile.imwrite(outfile, rgb_image)
