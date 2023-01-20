@@ -49,7 +49,7 @@ class _CalculateMarkers:
         return self._get_pixel_df(self.labelled_file)
     
     def _get_marker(self, marker):
-        return self._get_pixel_df(pathlib.Path(self.unstacked_folder, marker))
+        return self._get_pixel_df(pathlib.Path(self.unstacked_folder, f'{self.name}_{marker}.tif'))
     
     def _get_pixel_df(self, file):
         im = tifffile.imread(file)
