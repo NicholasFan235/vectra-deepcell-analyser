@@ -8,7 +8,7 @@ Each component of the pipeline takes input files and creates output files for th
 
 
 # Configuration
-Tile size and deepcell parameters are in `config.deepcell_config.py`. DeepcellConfig class is used as a global singleton, so the parameters can be easily edited.
+Tile size and deepcell parameters are in `config.deepcell_config.py`. DeepcellConfig class is used as a global static, so the parameters can be easily edited.
 
 To take into account varying fluorescent stains, it is intended that a `Panel` class containing a summary of the stains is created.
 Example see `panel_data/immune_panel.py`. This used for naming files and specifying which channels to give to deepcell.
